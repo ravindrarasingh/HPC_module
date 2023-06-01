@@ -18,6 +18,8 @@
 
 Step 1 : open the ens33 adapter file in network-scripts, and add the following lines
 -> vim /etc/sysconfig/network-scripts/ifcfg-ens33
+    # change BOOTPROTO=dhcp to BOOTPROTO=static
+    BOOTPROTO=static
     IPADDR=192.168.100.100
     PREFIX=24
     GATEWAY=192.168.100.2       
