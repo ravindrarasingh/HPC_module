@@ -82,6 +82,9 @@ step 22. pack image
     -> packimage centos7.9-x86_64-netboot-compute
 step 23. create defination for the image
     -> mkdef -t node cn00 groups=compute,all ip=10.10.10.3 mac=(macaddresso the node) netboot=xnba
+step 24. check defination for the node
+    -> lsdef cn00
+    -> chdef -t site domain=cdac.in  
 
 
 
