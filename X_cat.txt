@@ -94,7 +94,9 @@ step 27. makenetworks
     -> makenetworks
     -> makedhcp -n 
     -> cat /etc/dhcp/dhcpd.conf
-    
+    -> makedns -n
+step 28. test the node
+    -> nodeset compute osimage=centos7.9-x86_64-netboot-compute
 
 
 
