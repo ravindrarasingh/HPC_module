@@ -85,6 +85,16 @@ step 23. create defination for the image
 step 24. check defination for the node
     -> lsdef cn00
     -> chdef -t site domain=cdac.in  
+step 25. makehost of the compute nodes
+    -> makehosts
+step 26. add the domain and node hostnames
+    -> [ip] master master.cdac.in
+    -> [ip] cn00 cn00.cdac.in
+step 27. makenetworks
+    -> makenetworks
+    -> makedhcp -n 
+    -> cat /etc/dhcp/dhcpd.conf
+    
 
 
 
