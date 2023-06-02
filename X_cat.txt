@@ -53,6 +53,38 @@ step 10. add the interface name for the master
     -> chdef -t site dhcpinterfaces=ens37
 step 11. check if the interfaces have been added to xcat or not
     -> tabdump site | grep 'ens'
+step 12. list the osimages 
+    -> lsdef -t osimage
+step 13. create the diskimage using dd command
+    -> dd if=/dev/sr0 of=/centos.iso
+step 14. copy the centos iso file 
+    -> copycds /centos.iso
+step 15. check the lists of the os images
+    -> lsdef -t osimage
+    # install-compute : statefull
+    # netboot-compute : stateless
+    # statelite-compute : statelite 
+step 16. check the attributes of the osimages 
+    -> lsdef -t osimage centos7.9-x86_64-netboot-compute
+step 17. generate the image of the os image
+    -> genimage centos7.9-x86_64-netboot-compute
+step 18. navigate to the rootimg directory
+    -> cd cd /install/netboot/centos7.9/x86_64/compute/osimage/
+step 19. create the directory
+    -> mkdir -p /install/custom/netboot
+step 20. create a def which will sync the files accross the os
+    -> chdef -t osimage -o centos7.9-x86_64-netboot-compute synclists="/install/custom/netboot/compute.synclist"
+    # check the os image parameter
+    -> lsdef -t osimage centos7.9-x86_64-netboot-compute
+step 21. append the files list to the osimage 
+    -> echo /etc/passwd -> /etc/passwd >> /install  
+step 22. pack image
+    -> packimage centos7.9-x86_64-netboot-compute
+step 23. create defination for the image
+    -> 
+
+
+
 
 
 
