@@ -28,13 +28,14 @@ How to install XCAT
 
 How to setup the xCAT
 step 1. add Host only adapter
-        -> change ip to 10.10.10.2/24
+        -> change ip to 10.10.10.128/24
         -> change the host-only ip in virtual network editor to 10.10.10.0
         -> systemctl restart network
 step 2. disable firewalld
     -> systemctl stop firewalld; systemctl disable firewalld
 step 3. disable selinux
     -> setenforce 0
+    -> getenforce
     -> sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/conf
 step 4. install yum-utils
     -> yum install yum-utils
