@@ -1,0 +1,15 @@
+# export the bootimage path 
+-> export CHROOT=/install/netboot/centos7.9/x86_64/compute/rootimage/
+
+# check the CHROOT is correct or not
+-> chroot $CHROOT
+    -> mkdir demo
+        -> echo "this is demo_file" -> text.text
+    -> exit
+-> lsdef -t osimage
+-> packimage centos7.9-x86_64-netboot-compute
+
+# now reboot the pxe_client machine
+
+Defination:
+chroot is a command used to enter into a different file system,

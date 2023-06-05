@@ -55,6 +55,9 @@ step 11. check if the interfaces have been added to xcat or not
     -> tabdump site | grep 'ens'
 step 12. list the osimages 
     -> lsdef -t osimage
+    step 12.1 : check the current os mount location
+    -> lsblk
+    # if iso is not found, then click on the CD iso at the bottam right corner and click connect
 step 13. create the diskimage using dd command
     -> dd if=/dev/sr0 of=/centos.iso
 step 14. copy the centos iso file 
@@ -69,21 +72,30 @@ step 16. check the attributes of the osimages
 step 17. generate the image of the os image
     -> genimage centos7.9-x86_64-netboot-compute
 step 18. navigate to the rootimg directory
-    -> cd cd /install/netboot/centos7.9/x86_64/compute/osimage/
+    -> cd /install/netboot/centos7.9/x86_64/compute/rootimage/
+    # no osimage directory was found
 step 19. create the directory
     -> mkdir -p /install/custom/netboot
 step 20. create a def which will sync the files accross the os
     -> chdef -t osimage -o centos7.9-x86_64-netboot-compute synclists="/install/custom/netboot/compute.synclist"
-    # check the os image parameter
+    # check the osimage synclist parameter
     -> lsdef -t osimage centos7.9-x86_64-netboot-compute
 step 21. append the files list to the osimage 
-    -> echo /etc/passwd -> /etc/passwd >> /install  
+    -> echo /etc/passwd -> /etc/passwd >> /install 
+    # another method
+    -> vim /install/custom/netboot/compute.synclist
+        /etc/passwd -> /etc/passwd
+        /etc/shadow -> /etc/shadow
+        /etc/group -> /etc/group         
 step 22. pack image
     -> packimage centos7.9-x86_64-netboot-compute
 step 23. create defination for the image
     -> mkdef -t node cn00 groups=compute,all ip=10.10.10.3 mac=(macaddresso the node) netboot=xnba
+    # example
+    -> # mkdef -t node cn00 groups=compute,all ip=10.10.10.3 mac=00:0C:29:2D:16:68 netboot=xnba
 step 24. check defination for the node
     -> lsdef cn00
+    # add the domain defination
     -> chdef -t site domain=cdac.in  
 step 25. makehost of the compute nodes
     -> makehosts
@@ -93,6 +105,7 @@ step 26. add the domain and node hostnames
 step 27. makenetworks
     -> makenetworks
     -> makedhcp -n 
+    # check if entries are made or not
     -> cat /etc/dhcp/dhcpd.conf
     -> makedns -n
 step 28. test the node
