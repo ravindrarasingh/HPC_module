@@ -90,10 +90,12 @@ step 21. append the files list to the osimage
         /etc/group -> /etc/group         
 step 22. pack image
     -> packimage centos7.9-x86_64-netboot-compute
-step 23. create defination for the image
+step 23. create defination to add the node
     -> mkdef -t node cn00 groups=compute,all ip=10.10.10.3 mac=(macaddresso the node) netboot=xnba
     # example
     -> # mkdef -t node cn00 groups=compute,all ip=10.10.10.3 mac=00:0C:29:2D:16:68 netboot=xnba
+    -> # mkdef -t node cn01 groups=compute,all ip=10.10.10.4 mac=00:0C:29:BE:29:3E netboot=xnba
+
 step 24. check defination for the node
     -> lsdef cn00
     # add the domain defination
