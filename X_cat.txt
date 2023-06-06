@@ -42,8 +42,8 @@ step 4. install yum-utils
 step 5. install epel-release
     -> yum install epel-release
 step 6. add the repositories
-    -> wget -P /etc/yum.repos.d https://xcat.org/files/xcat/repos/yum/latest/xcat-core/xcat-core.repo
-    -> wget -P /etc/yum.repos.d https://xcat.org/files/xcat/repos/yum/xcat-dep/rh7/x86_64/xcat-dep.repo
+    -> wget -P /etc/yum.repos.d https://xcat.org/files/xcat/repos/yum/latest/xcat-core/xcat-core.repo --no-check-certificate;
+    -> wget -P /etc/yum.repos.d https://xcat.org/files/xcat/repos/yum/xcat-dep/rh7/x86_64/xcat-dep.repo --no-check-certificate;
 step 7. install the xCAT
     -> yum install xCAT
 step 8. enable the xCAT script
@@ -73,8 +73,7 @@ step 16. check the attributes of the osimages
 step 17. generate the image of the os image
     -> genimage centos7.9-x86_64-netboot-compute
 step 18. navigate to the rootimg directory
-    -> cd /install/netboot/centos7.9/x86_64/compute/rootimage/
-    # no osimage directory was found
+    -> cd /install/netboot/centos7.9/x86_64/compute/rootimg/
 step 19. create the directory
     -> mkdir -p /install/custom/netboot
 step 20. create a def which will sync the files accross the os
@@ -82,7 +81,7 @@ step 20. create a def which will sync the files accross the os
     # check the osimage synclist parameter
     -> lsdef -t osimage centos7.9-x86_64-netboot-compute
 step 21. append the files list to the osimage 
-    -> echo /etc/passwd -> /etc/passwd >> /install 
+    -> echo "/etc/passwd -> /etc/passwd" >> /install/custom/netboot/compute.synclist 
     # another method
     -> vim /install/custom/netboot/compute.synclist
         /etc/passwd -> /etc/passwd
@@ -116,12 +115,102 @@ step 28. test the node
 
 
 
+########################################
+
+    DiskFull xCAT installation
+
+########################################
+
+NOTE: please follow about steps from 1-14:
+
+Step 1: check the available osimages in the os
+    -> lsdef -t osimage centos7.9-x86_64-install-compute
+
+Step 2: create a directory to host the rpm packages
+    -> mkdir -p /install/post/otherpkgs/centos7.9/x86_64
+    -> cd /install/post/otherpkgs/centos7.9/x86_64
+
+Step 3: createrepo from the current path
+    -> createrepo .
+
+Step 4: create a directory which will store the list of rpm packages, which are needed to be installed
+    -> mkdir /install/custom/netboot/centos/
+    -> vim /install/custom/netboot/centos/otherpkgs.pkglist
+        # add the following packages to the file
+slurm
+slurm-contribs
+slurm-devel
+slurm-example-configs
+slurm-libpmi,
+slurm-openlava
+slurm-pam_slurm
+slurm-perlapi
+slurm-torque
+perl-Switch,
+munge
+munge-libs
+munge-devel
+lmod-ohpc
+openldap-clients
+nss-pam-ldapd, 
+figlet
+lmodohpc
+prelink
+aide
+iftop
+fail2ban
+rkhunter
+mod_ssl
+beegfs-common,
+beegfs-helperd
+beegfs-utils
+beegfs-client
+
+Step 5: change the definition of packagelist in the tabdump site 
+    -> chdef -t osimage [image_name] otherpkgdir=/install/post/otherpkgs/centos7.9/x86_64 otherpkglist=/install/custom/netboot/centos/otherpkgs.pkgslist
+
+Step 6: create a partition table
+    -> vim /install/custom/partitionfile
+clearpart --all --initlabel --drives=sda,sdb
+volgroup data_vg --pesize=4096 pv.1005
+volgroup os_vg --pesize=4096 pv.452
+part pv.1005 --fstype="lvmpv" --ondisk=sdb --size=5720638
+part /boot/efi --fstype="efi" --ondisk=sda --size=1024 --fsoptions="umask=0077,shortname=winnt"
+part /boot --fstype="xfs" --ondisk=sda --size=10240
+part pv.452 --fstype="lvmpv" --ondisk=sda --size=1132862
+logvol /var  --fstype="xfs" --size=614400 --name=var --vgname=data_vg
+logvol /opt  --fstype="xfs" --size=204800 --name=opt --vgname=data_vg
+logvol /var/log/audit  --fstype="xfs" --size=512000 --name=var_log_audit --vgname=data_vg
+logvol swap  --fstype="swap" --size=49152 --name=swap --vgname=os_vg
+logvol /  --fstype="xfs" --size=1083707 --name=root --vgname=os_vg
+logvol /var/log  --fstype="xfs" --size=4184631 --name=var_log --vgname=data_vg
+logvol /tmp  --fstype="xfs" --size=204800 --name=tmp --vgname=data_vg
+
+Step 7: change the definition of the partition table in the install-compute image
+    -> chdef -t osimage -o centos7.9-x86_64-install-compute partitionfile=/install/custom/partitionfile
+
+Step 8: change the definition of the synclist
+    -> chdef -t osimage -o centos7.9-x86_64-install-compute synclists=/install/custom/netboot/centos/login.synclist
+
+Step 9: make changes to the template file 
+    -> vim /opt/xcat/share/xcat/install/centos/compute.centos7.tmpl
+        # search for the skipx paramaeter and comment it
+        # search for the text and comment it
+        # add the password of the user
+        -> auth --enableshadow --passlog=sha512rootpw --iscrypted $6$oHYSx2ZT4feDFiWN$gNFCfXHvoJrEJB6.L0BmJFeRUmp0dbmK7lEBPDxqtVgcSOoKOvKBoLvCwXKn6VnMTCcX.7X3cGfQysSvxHNJr/
+
+Step 10: setup the postbootScripts
+    -> vim /install/postscripts/otherpkgs
+        # enable debug
+        # set -x
+        mkdir /etc/yum.repos.d/yum.bk
+        mv /etc/yum.repos.d/CentOS-* /etc/yum.repos.d/yum.bk
+
+Step 11: Create Node Definition
+    -> mkdef -t node [node_name] groups=compute,all ip=[node_ip] mac=[node_mac] netboot=xnba
+    -> # mkdef -t node node1 groups=compute,all ip=10.10.10.139 mac=00:0C:29:13:F8:5E netboot=xnba
+    -> chdef [node_name] postbootscripts=otherpkgs
 
 
 
-
-# xcat database 
-
-# commands
-=> chdef : used to change the defination of the xcat server
-    -> chdef 
+        
