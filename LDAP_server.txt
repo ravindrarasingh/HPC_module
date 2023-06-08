@@ -2,6 +2,7 @@
         LDAP: (light weight directory access protocol)
 ==============================================================
 
+# reference link : https://www.itzgeek.com/how-tos/linux/centos-how-tos/step-step-openldap-server-configuration-centos-7-rhel-7.html
 # cn = common name
 # dn = distuinguished name
 # sn = service name
@@ -143,6 +144,20 @@ gidNumber: 1001
 
 # add the user to the ldap server
 -> ldapsearch -x cn=user1 -b dc=cdac,dc=in
+
+
+============================================
+  Commands to run on LDAP-client
+============================================
+# Don't forget to disable the firewalld and selinux
+# Don't forget to add the master entry in the /etc/hosts file
+
+# install the required packages in the client machine
+-> yum install openldap-clients nss-pam-ldapd
+
+
+
+
 
 
 itsgeeks : open ldap multimaster
