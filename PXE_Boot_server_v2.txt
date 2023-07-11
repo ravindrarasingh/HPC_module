@@ -27,7 +27,7 @@ Step 2: change the hostname
 Step 3: install the packages
     -> yum install -y dhcp syslinux tftp-server xinetd;
 Step 4: setup the dhcp server
-    -> vim /etc/dhcp/dhcp.conf
+    -> vim /etc/dhcp/dhcpd.conf
         subnet [ip_network] netmask 255.255.255.0 {
             option domain-name-servers master;
             default-lease-time 600;
