@@ -25,19 +25,34 @@ runs in the background to manage all the resources
 ![slurm architecture](./arch.gif)
 
 ## commands for SLURM
-* ### sacct                 
-* ### salloc
-* ### sattach
-* ### sbatch 
-* ### sbcast 
-* ### scancel 
-* ### scontrol 
-* ### sinfo 
-* ### sprio 
-* ### squeue 
-* ### srun 
-* ### sshare 
-* ### ssat 
-* ### strigger 
-* ### sview 
+* #### sacct                 
+* #### salloc
+* #### sattach
+* #### sbatch 
+* #### sbcast 
+* #### scancel 
+* #### scontrol 
+* #### sinfo 
+* #### sprio 
+* #### squeue 
+* #### srun 
+* #### sshare 
+* #### ssat 
+* #### strigger 
+* #### sview 
+
+## Authentication Service
+[MUNGE](https://github.com/dun/munge/wiki) it is a authentication service used within the cluster. used to authenticate internal services.
+
+uses munge key to authenticate and encrypt services between slurmctl and slurmd.
+
+default port : 6817 (slurmctld)
+default port : 6818 (slurmd)
+
+FLOW of MUNGE service
+1. key generation
+1. message encryption
+1. message authentication
+1. access control
+
 

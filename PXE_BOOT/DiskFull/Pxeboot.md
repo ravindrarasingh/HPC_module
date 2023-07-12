@@ -38,16 +38,29 @@ Pre-requisits for PXE_boot:
 ### Step 1 : setup the OS
 ---
 * Disable the selinux  
-`setenforce 0;`  
+> `setenforce 0;`  
 `sed -i 's/^SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config;`
 
 * Disable the firewall  
-`systemctl stop firewalld;`  
+> `systemctl stop firewalld;`  
 `systemctl disable firewalld;`
 
 ---
 ### Step 2 : Download the required packages
 ---
 * Download the packages  
-`yum install syslinux tftp-server httpd xinetd dhcp -y;`  
-``
+> `yum install syslinux tftp-server httpd xinetd dhcp -y;`  
+
+---
+### Step 3 : setup the dhcp server
+---
+* Download the packages  
+> `yum install syslinux tftp-server httpd xinetd dhcp -y;`  
+`cat << EOF > /etc/dhcp/dhcpd.conf \
+subnet 10.10.10.0\24 netmask 255.255.255.0 {
+    option domai-name-servers master;
+    default-lease-time 600;
+    max-lease-time 7200;
+    range 10.10.10.210 10.10.10.230;
+    option routers 10.10.10.155
+} `
