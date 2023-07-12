@@ -1,5 +1,15 @@
 # SLURM
-Simple Linux Utility for Resource Management
+* Simple Linux Utility for Resource Management
+* it is master and worker node architecture
+* it can't be described as client server because
+
+```
+reason being, server is always passively open and listens for the request and serves them.
+here client is the initiator
+
+whereas in concept of master-minion master asks for the data from the worker node, it is not waiting for worker node request.
+here masteris is the initiator
+```
 
 ## Compnents of SLURM
 ### Batch systems
@@ -13,4 +23,21 @@ runs in the background to manage all the resources
 
 ## Architecture of SLURM
 ![slurm architecture](./arch.gif)
+
+## commands for SLURM
+* ### sacct                 
+* ### salloc
+* ### sattach
+* ### sbatch 
+* ### sbcast 
+* ### scancel 
+* ### scontrol 
+* ### sinfo 
+* ### sprio 
+* ### squeue 
+* ### srun 
+* ### sshare 
+* ### ssat 
+* ### strigger 
+* ### sview 
 
