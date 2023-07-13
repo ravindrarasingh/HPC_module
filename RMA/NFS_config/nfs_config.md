@@ -137,5 +137,37 @@ systemctl start rngd;systemctl enable rngd;
 
 ### Step 5: download slurm tar file from source 
 ```bash
-
+wget https://download.schedmd.com/slurm/slurm-20.11.9.tar.bz2
 ```
+![selinux](./images/18.jpg)
+### Step 6: build the package 
+```bash
+yum install -y rpm-build;
+rpmbuild -ta slurm-20.11.9.tar.bz2
+# to install the dependencies
+yum install pam-devel python3 readline-devel perl-ExtUtils-MakeMaker gcc mysql-devel -y
+# now try to build the package again
+rpmbuild -ta slurm-20.11.9.tar.bz2
+```
+![selinux](./images/19.jpg)
+![selinux](./images/20.jpg)
+![selinux](./images/21.jpg)
+
+### Step 7: creating user for slurm   
+```bash
+# variable export 
+export SLURMUSER=900;
+# add group
+groupadd -g $SLURMUSER slurm;
+useradd -m -c "SLURM workload manager" -d /var/lib/slurm -u $SLURMUSER -g slurm -s /bin/bash slurm;
+cat /etc/passwd;
+```
+![selinux](./images/22.jpg)
+
+
+
+
+
+
+
+
