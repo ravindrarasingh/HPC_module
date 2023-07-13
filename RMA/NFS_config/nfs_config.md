@@ -91,5 +91,51 @@ echo 10.10.10.158:/home /home   nfs nosuid,rw,sync,hard,intr    0   0 >> vi /etc
 umount /mnt/sharedFolder
 ```
 ![selinux](./images/12.jpg)
+---
+
+# How to install slurm
+### Step 1: install packages
+```bash
+yum install epel-release munge munge-libs munge-devel -y;
+```
+![selinux](./images/13.jpg)
+### Step 2: generate the munge key 
+```bash
+/usr/sbin/create-munge-key -r;
+```
+![selinux](./images/14.jpg)
+
+### Step 3: copy the munge key on both minions 
+```bash
+scp /etc/munge/munge.key root@minion1:/etc/munge;
+scp /etc/munge/munge.key root@minion2:/etc/munge;
+```
+![selinux](./images/15.jpg)
+### Step 4: start the munge services 
+```bash
+chown munge:munge /etc/munge/munge.key;
+systemctl start munge.service;systemctl enable munge.service;
+ssh root@minion1 'chown munge:munge /etc/munge/munge.key;' 
+ssh root@minion2 'systemctl start munge.service;systemctl enable munge.service;' 
+ssh root@minion2 'chown munge:munge /etc/munge/munge.key;' 
+ssh root@minion1 'systemctl start munge.service;systemctl enable munge.service;' 
+```
+```
+[Error]:
+
+if munge key is not generated or taking too much time to create then we have to install random number generator for more information please follow the link given below
+
+to solve this issue:
+yum install -y rngd;
+systemctl start rngd;systemctl enable rngd;
+```
+[random number generator](https://stackoverflow.com/questions/4819359/dev-random-extremely-slow) 
+![selinux](./images/16.jpg)
+![selinux](./images/17.jpg)
 
 
+
+### Step 5: download slurm tar file from source 
+```bash
+
+```
