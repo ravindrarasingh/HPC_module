@@ -190,7 +190,8 @@ rpm -qa | grep slurm | wc -l
 ![selinux](./images/23.jpg)
 
 ### Step 9: create the directories for the slurm configuration   
-> create folder where master has to store log files and give permission of those directories to slurm
+> create folder where master has to store log files and give permission of those directories to slurm  
+> partitions are created according to the group of node types(CPU Nodes, HM nodes,)
 ```bash
 mkdir /var/spool/slurm
 chown slurm:slurm /var/spool/slurm
@@ -200,11 +201,37 @@ chown slurm:slurm /var/log/slurm
 touch /var/log/slurm_jobacct.log /var/log/slurm_jobcomp.log
 
 # copying the configuration example file and creating new file
-cp /etc/slurm/clurm.conf.example /etc/slurm/clurm.conf
-vi /etc/slurm/clurm.conf
+cp /etc/slurm/slurm.conf.example /etc/slurm/slurm.conf
+vi /etc/slurm/slurm.conf
     edit : clusterName=hpcsa
     edit : clusterMachine=master
+    edit : slurmUser=slurm
+    edit : #COMPUTE NODES
+            #NodeName=node[1-2] Procs=1 State=UNKOWN
+            NodeName=minion1 CPUs=2 Boards=1 SocketsPerBoard=2 CoresPerSocket=1 ThreadsPerCore=1 RealMemory=1819 State=UNKOWN 
+            NodeName=minion2 CPUs=4 Boards=1 SocketsPerBoard=4 CoresPerSocket=1 ThreadsPerCore=1 RealMemory=7802 State=UNKOWN
+            ParitionName=standard NODES=ALL Default=YES MaxTime=INFINITE State=UP
+            :wq # save and exit
+
+
+# run on client and get the satus of the node and paste this information in the configuration file
+slurmd -C
+
+chown slurm:slurm /etc/slurm/slurm.conf
+# copy this config file to all the nodes
+scp /etc/slurm/slurm.conf root@minion1:/etc/slurm/
+scp /etc/slurm/slurm.conf root@minion2:/etc/slurm/
+
+# start slurmctld service on master
+systemctl start slurmctld;systemctl enable slurmctld;
+# start slurmd service on master
+systemctl start slurmd;systemctl enable slurmd;
 ```
+![selinux](./images/24.jpg)
+![selinux](./images/25.jpg)
+![selinux](./images/26.jpg)
+![selinux](./images/27.jpg)
+![selinux](./images/28.jpg)
 
 
 
