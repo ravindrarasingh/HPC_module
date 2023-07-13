@@ -187,9 +187,21 @@ yum --nogpgcheck localinstall * -y
 # to confirm if packages has been installed or not
 rpm -qa | grep slurm | wc -l
 ```
-![selinux](./images/22.jpg)
+![selinux](./images/23.jpg)
 
+### Step 9: create the directories for the slurm configuration   
+> create folder where master has to store log files and give permission of those directories to slurm
+```bash
+mkdir /var/spool/slurm
+chown slurm:slurm /var/spool/slurm
+chmod 755 /var/spool/slurm
+mkdir /var/log/slurm
+chown slurm:slurm /var/log/slurm
+touch /var/log/slurm_jobacct.log /var/log/slurm_jobcomp.log
 
+# copying the configuration example file and creating new file
+cp /etc/slurm/clurm.conf.example /etc/slurm/clurm.conf
+```
 
 
 
