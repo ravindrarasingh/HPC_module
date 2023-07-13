@@ -141,6 +141,7 @@ wget https://download.schedmd.com/slurm/slurm-20.11.9.tar.bz2
 ```
 ![selinux](./images/18.jpg)
 ### Step 6: build the package 
+> install packages on all nodes, but run rpmbuild only on master
 ```bash
 yum install -y rpm-build;
 rpmbuild -ta slurm-20.11.9.tar.bz2
@@ -154,6 +155,7 @@ rpmbuild -ta slurm-20.11.9.tar.bz2
 ![selinux](./images/21.jpg)
 
 ### Step 7: creating user for slurm   
+> create this user on all three nodes, masters as well as minions
 ```bash
 # variable export 
 export SLURMUSER=900;
