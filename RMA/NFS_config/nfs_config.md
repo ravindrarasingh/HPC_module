@@ -27,10 +27,16 @@ systemctl enable nfs-server rpcbind
 ```bash
 chmod 777 /home/
 ```
+![selinux](./images/5.jpg)
+
 ### Step 4: make entry of the shared file in the /etc/exports
 ```bash
 /home 10.10.10.0/24(rw,sync,no_root_squash)
+# dont give space between ip(permissions), this will lead to read only file system error
 ```
+![selinux](./images/6.jpg)
+
+
 ### Step 5: export the shared directories using given command
 ```bash
 exportfs -r
@@ -39,6 +45,9 @@ exportfs -r
 # exportfs -u : unexport one or more directories
 # exportfs -r : re-export all directories after modifying /etc/exports
 ```
+![selinux](./images/7.jpg)
+
+
 ### Step 6: configure the firewall
 ```bash
 firewall-cmd --permanent --add-service mountd
@@ -46,12 +55,13 @@ firewall-cmd --permanent --add-service rpc-bind
 firewall-cmd --permanent --add-service nfs
 firewall-cmd --reload
 ```
+![selinux](./images/8.jpg)
 ---
 ---
 # Configure the Clients
 ### Step 7: install package on client 
 ```bash
-yum install -y nfs-utils
+yum install -y nfs-utils            
 ```
 ### Step 8: check if shared file or directory is visible or not
 ```bash
