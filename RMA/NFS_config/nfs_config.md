@@ -165,6 +165,29 @@ useradd -m -c "SLURM workload manager" -d /var/lib/slurm -u $SLURMUSER -g slurm 
 cat /etc/passwd;
 ```
 ![selinux](./images/22.jpg)
+### Step 8: now install the local packages   
+> install local packages present in the path /root/rpmbuild/RPMS/x86_64/
+```bash
+cd /root/rpmbuild/RPMS/x86_64/
+yum --nogpgcheck localinstall * -y
+# to confirm if packages has been installed or not
+rpm -qa | grep slurm | wc -l
+# make directory on shared home folder of master
+mkdir /home/rpms;
+# copy all the packages from /root/rpmbuild/RPMS/x86_64/ to /home/rpms
+cp * /home/rpms/;
+# on minion1
+cd /home/rpms;
+yum --nogpgcheck localinstall * -y
+# to confirm if packages has been installed or not
+rpm -qa | grep slurm | wc -l
+# on minion2
+cd /home/rpms;
+yum --nogpgcheck localinstall * -y
+# to confirm if packages has been installed or not
+rpm -qa | grep slurm | wc -l
+```
+![selinux](./images/22.jpg)
 
 
 
