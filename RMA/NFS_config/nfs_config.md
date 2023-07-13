@@ -201,6 +201,9 @@ touch /var/log/slurm_jobacct.log /var/log/slurm_jobcomp.log
 
 # copying the configuration example file and creating new file
 cp /etc/slurm/clurm.conf.example /etc/slurm/clurm.conf
+vi /etc/slurm/clurm.conf
+    edit : clusterName=hpcsa
+    edit : clusterMachine=master
 ```
 
 
