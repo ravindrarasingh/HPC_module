@@ -63,27 +63,33 @@ firewall-cmd --reload
 ```bash
 yum install -y nfs-utils            
 ```
+![selinux](./images/9.jpg)
+
 ### Step 8: check if shared file or directory is visible or not
 ```bash
 showmount -e 10.10.10.158
 ```
+![selinux](./images/10.jpg)
 
 ### Step 9: mount the shared directory
 ```bash
-mkdir /mnt/sharedFolder
-mount 10.10.10.158:/home /mnt/sharedFolder
+mount -t nfs 10.10.10.158:/home /home
 # to check if given directory is mounted or not
 mount | grep nfs 
 # to check if given directory is mounted or not
 df -hT
 ```
+![selinux](./images/11.jpg)
+
+
 ### Step 10: how to enable automount
 ```bash
-echo 10.10.10.158:/home /mnt/sharedFolder   nfs nosuid,rw,sync,hard,intr    0   0 >> vi /etc/fstab
+echo 10.10.10.158:/home /home   nfs nosuid,rw,sync,hard,intr    0   0 >> vi /etc/fstab
 ```
 ### Step 10: how to unmount the shared directory
 ```bash
 umount /mnt/sharedFolder
 ```
+![selinux](./images/12.jpg)
 
 
