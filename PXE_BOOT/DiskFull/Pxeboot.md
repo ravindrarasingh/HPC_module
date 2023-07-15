@@ -37,30 +37,89 @@ Pre-requisits for PXE_boot:
 
 ### Step 1 : setup the OS
 ---
-* Disable the selinux  
-> `setenforce 0;`  
-`sed -i 's/^SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config;`
+```bash
+# Disable the selinux  
+setenforce 0;  
+sed -i 's/^SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config;
 
-* Disable the firewall  
-> `systemctl stop firewalld;`  
-`systemctl disable firewalld;`
-
+# Disable the firewall  
+systemctl stop firewalld;  
+systemctl disable firewalld;
+```
 ---
 ### Step 2 : Download the required packages
 ---
-* Download the packages  
-> `yum install syslinux tftp-server httpd xinetd dhcp -y;`  
-
+```bash
+# Download the packages 
+yum install epel-release -y; 
+yum install tftp-server -y;  
+yum install httpd -y;  
+yum install xinetd -y;  
+yum install dhcp -y;  
+```
 ---
 ### Step 3 : setup the dhcp server
 ---
-* Download the packages  
-> `yum install syslinux tftp-server httpd xinetd dhcp -y;`  
-`cat << EOF > /etc/dhcp/dhcpd.conf \
+```bash
+# create dhcpd.conf file   
+cat << EOF > /etc/dhcp/dhcpd.conf 
 subnet 10.10.10.0\24 netmask 255.255.255.0 {
-    option domai-name-servers master;
-    default-lease-time 600;
+    option domain-name-servers master;
+    # option domain-name-servers 10.10.10.155;
+    option routers 10.10.10.155
+    default-lease-time 3600;
     max-lease-time 7200;
     range 10.10.10.210 10.10.10.230;
-    option routers 10.10.10.155
-} `
+}
+EOF 
+# to check if dhcp server is configured properly or not
+dhcpd -t
+# start the services 
+systemctl start dhcpd tftp.service xinetd httpd;
+systemctl enable dhcpd tftp.service xinetd httpd;
+```
+### Step 4: setup the PXE boot directories
+---
+```bash
+mkdir -p /var/pxe/centos7 
+mkdir -p /var/lib/tftpboot/centos7
+# list all the blocks of storages 
+lsblk
+# duplicate disk command  
+dd if=/dev/sr0 of=/centos7.iso
+# mount the disk  
+mount -t iso9660 -o loop /centos7.iso /var/pxe/centos7
+# copy the kernel from the installed image to destination folder  
+cp /var/pxe/centos7/images/pxeboot/vmlinuz /var/lib/tftpboot/centos7/
+cp /var/pxe/centos7/images/pxeboot/initrd.img /var/lib/tftpboot/centos7/
+cp /usr/share/syslinux/menu.c32 /var/lib/tftpboot/
+cp /usr/share/syslinux/pxelinux.0  /var/lib/tftpboot/
+# create PXE boot config file
+cat << EOF > /var/lib/tftpboot/pxelinux.cfg/default
+# creating PXE defination
+timeout 100
+default menu.c32
+menu title ######## PXE BOOT MENU #########
+label 1
+        menu label ^1) install Centos 7
+        kernel centos7/vmlinuz
+        append initrd=centos7/initrd.img method=http://10.0.0.155/centos7 devfs=nomount
+label 2
+        menu label ^2) Boot from local drive
+        localboot 
+EOF
+```
+### Step 5 : host the file for pxeboot
+---
+```bash
+# create dhcpd.conf file   
+cat << EOF > /etc/httpd/conf.d/pxeboot.conf \
+# create new
+        Alias /centos7 /var/pxe/centos7
+        <Directory /var/pxe/centos7>
+            Options Indexes FollowSymLinks 
+            # Ip address that will be allowed to access
+            Require ip 127.0.0.1 [network_ip]
+        </Directory>
+EOF
+```
