@@ -48,6 +48,7 @@ uses munge key to authenticate and encrypt services between slurmctl and slurmd.
 
 default port : 6817 (slurmctld)
 default port : 6818 (slurmd)
+default port : 6819 (slurmdbd)
 
 FLOW of MUNGE service
 1. key generation

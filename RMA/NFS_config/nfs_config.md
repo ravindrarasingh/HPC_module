@@ -93,6 +93,8 @@ umount /mnt/sharedFolder
 ![selinux](./images/12.jpg)
 ---
 
+[reference for slurm installation](https://github.com/Artlands/Install-Slurm)
+
 # How to install slurm
 ### Step 1: install packages
 ```bash
@@ -268,7 +270,7 @@ systemctl restart slurmd;systemctl status slurmd;
 # taking shell of a minion
 srun -w minion1 --pty /bin/bash
 
-# submitting the job to minion1
+# to submit a job to client in interactive mode
 srun -N1 --pty /bin/bash
 
 # how to set state of a node to down
@@ -305,11 +307,22 @@ scontrol update node=minion1 state=resume reason=main
 
 #SBATCH --out=output-%j.out
 
+# how to see details of the running job
+scontrol show job [id]
+# to get job id
+squeue
+
 
 
 ```
 ![selinux](./images/31.jpg)
 ![selinux](./images/32.jpg)
 ![selinux](./images/33.jpg)
+![selinux](./images/34.jpg)
 
+### Step 12: slurm accounts
+```bash
+# to see accounts
+sshare
+```
 
