@@ -253,6 +253,11 @@ mkdir -p /var/spool/slurm/d
 systemctl restart slurmd;
 systemctl status slurmd;
 
+# slurmctld runs on master
+systemctl restart slurmctld;systemctl status slurmctld; 
+# slurmd runs on minions 
+systemctl restart slurmd;systemctl status slurmd; 
+
 ```
 ![selinux](./images/29.jpg)
 ![selinux](./images/30.jpg)
