@@ -237,6 +237,7 @@ systemctl start slurmd;systemctl enable slurmd;
 
 
 # Day 2:
+### Step 10: start the services
 ```bash
 # disable the selinux
 setenforce 0;
@@ -262,5 +263,53 @@ systemctl restart slurmd;systemctl status slurmd;
 ![selinux](./images/29.jpg)
 ![selinux](./images/30.jpg)
 
+### Step 11: submitting the job
+```bash
+# taking shell of a minion
+srun -w minion1 --pty /bin/bash
+
+# submitting the job to minion1
+srun -N1 --pty /bin/bash
+
+# how to set state of a node to down
+scontrol update node=minion1 state=down reason=main
+
+# how to set state of a node to resume
+scontrol update node=minion1 state=resume reason=main
+
+
+# how to submit a script using sbatch
+
+#!/bin/bash
+# Account:
+#SBATCH --account=account_name
+#
+# Job name:
+#SBATCH --job-name=test
+#
+# Partition:
+#SBATCH --partition=standard
+#
+# Request one node:
+#SBATCH --nodes=2
+#
+# Specify one task:
+#SBATCH --ntasks-per-node=1
+#
+# Number of processors for single task needed for use case (example):
+#SBATCH --cpus-per-task=2
+#
+# Wall clock limit:
+#SBATCH --time=00:05:00
+#
+
+#SBATCH --out=output-%j.out
+
+
+
+```
+![selinux](./images/31.jpg)
+![selinux](./images/32.jpg)
+![selinux](./images/33.jpg)
 
 
