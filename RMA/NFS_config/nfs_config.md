@@ -199,6 +199,8 @@ chmod 755 /var/spool/slurm
 mkdir /var/log/slurm
 chown slurm:slurm /var/log/slurm
 touch /var/log/slurm_jobacct.log /var/log/slurm_jobcomp.log
+chown slurm:slurm /var/log/slurm_jobacct.log /var/log/slurm_jobcomp.log
+
 
 # copying the configuration example file and creating new file
 cp /etc/slurm/slurm.conf.example /etc/slurm/slurm.conf
@@ -234,7 +236,26 @@ systemctl start slurmd;systemctl enable slurmd;
 ![selinux](./images/28.jpg)
 
 
+# Day 2:
+```bash
+# disable the selinux
+setenforce 0;
+sed -i 's/SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config
+systemctl stop firewalld;systemctl disable firewalld;
+# restarting the services
+systemctl start munge slurmd;
+systemctl status munge slurmd;
 
+# to troubleshoot the reason why slurmd is not starting
+slurmd -Dvv
+# we need to create required folder 
+mkdir -p /var/spool/slurm/d
+systemctl restart slurmd;
+systemctl status slurmd;
+
+```
+![selinux](./images/29.jpg)
+![selinux](./images/30.jpg)
 
 
 
