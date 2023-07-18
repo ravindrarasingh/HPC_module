@@ -324,5 +324,12 @@ squeue
 ```bash
 # to see accounts
 sshare
+
+# to create reservation 
+scontrol create reservation starttime= duration= user=root nodes=all
+
+# to check reservations
+scontrol show res
+
 ```
 
