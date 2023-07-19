@@ -10,3 +10,4 @@ yum groupinstall "Development Tools"
 
 
 ```
+![](./images/1.jpg)
