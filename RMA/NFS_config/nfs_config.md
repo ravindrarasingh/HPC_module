@@ -84,7 +84,7 @@ df -hT
 
 ### Step 10: how to enable automount
 ```bash
-echo 10.10.10.158:/home /home   nfs nosuid,rw,sync,hard,intr    0   0 >> vi /etc/fstab
+echo "10.10.10.158:/home /home   nfs nosuid,rw,sync,hard,intr    0   0" >> vi /etc/fstab
 ```
 ### Step 10: how to unmount the shared directory
 ```bash

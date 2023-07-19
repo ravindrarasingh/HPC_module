@@ -11,9 +11,9 @@
 yum install mariadb-server mariadb-devel -y
 
 # start the services in mariadb
-systemctl enable mariadb
-systemctl start mariadb
-systemctl status mariadb
+systemctl enable mariadb;
+systemctl start mariadb;
+systemctl status mariadb;
 ```
 ### Step 2: create mysql user and give privileges
 ```bash
@@ -53,6 +53,7 @@ DbdHost=localhost
 DbdPort=6819
 StoragePass=1234
 StorageLoc=slurm_acct_db
+StorageType=accounting_storage/mysql
 EOF
 
 # change permissions of the slurmdbd
@@ -78,12 +79,24 @@ systemctl status slurmdbd
 ### Step 1: 
 ```bash
 # in order to configure slurm configless we need to change a property in slurm.conf file which is 
-SlurmctldParameters=enable_configless
+echo "SlurmctldParameters=enable_configless" >> /etc/slurm/slurm.conf
+systemctl restart slurmctld;
+systemctl status slurmctld;
 ```
 ### Step 2: 
 ```bash
-# start slurmd with --conf-server parameter 
-slurmd --conf-server slurmctl-primary:6817
+# make entry in resolv.conf 
+echo "_slurmctld._tcp 3600 IN SRV 0 0 6817 slurm-master" >> /etc/slurm/resolve.conf
+```
+### Step 3: configure slurmd configure on client
+```bash
+# start slurmd with --conf-server parameter on client 
+slurmd --conf-server slurm-master:6817
+
+# restart the services
+systemctl restart slurmd;
+systemctl status slurmd;
+
 ```
 ## solution 3 :
 
