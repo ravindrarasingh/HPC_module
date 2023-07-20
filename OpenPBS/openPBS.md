@@ -85,11 +85,27 @@ yum install -y libtool-ltdl-devel hwloc-devel libX11-devel libXt-devel libedit-d
 # run ./configure command (make sure /opt/pbs folder is empty)
 ./configure --prefix=/opt/pbs/
 
+# run make install command
+make install
+
+
+# make the pbs.sh executeable
+chmod -x /opt/pbs/etc/pbs.sh
+
+
+
+# source the command
+. /opt/pbs/etc/pbs.sh
+
+# just in case export command do not work, export it mannually
+export PATH=${PATH}:/opt/pbs/bin
 
 
 ```
 ![](./images/7.jpg)
 ![](./images/8.jpg)
+![](./images/9.jpg)
+![](./images/10.jpg)
 
 
 
