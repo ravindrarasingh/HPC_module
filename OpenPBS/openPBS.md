@@ -1,5 +1,6 @@
 # OpenPBS
 
+## on master
 ### Step 1: install packages
 ```bash
 # clone the openpbs repo
@@ -55,6 +56,9 @@ systemctl start pbs
 # to source the environment
 . /etc/profile.d/pbs.sh
 
+# how to check journalctl for specific service(Optional)
+journalctl -f -u pbs
+
 ```
 ![](./images/3.jpg)
 ![](./images/4.jpg)
@@ -62,6 +66,30 @@ systemctl start pbs
 ![](./images/6.jpg)
 
 
+## on node 1
+
+### Step 4: 
+```bash
+# clone git repository and install development tools
+git clone https://github.com/openpbs/openpbs.git;
+yum groupinstall "Development Tools" -y;
+yum groupinstall autoconf automake libtool -y;
+
+# run autogen.sh
+cd openpbs;
+./autogen.sh
+
+# install dependencies
+yum install -y libtool-ltdl-devel hwloc-devel libX11-devel libXt-devel libedit-devel libical-devel ncurses-devel postgresql-devel postgresql-contrib python3-devel tcl-devel tk-devel zlib-devel expat-devel openssl-devel libXext libXft gcc hwloc-devel openssl ;
+
+# run ./configure command (make sure /opt/pbs folder is empty)
+./configure --prefix=/opt/pbs/
+
+
+
+```
+![](./images/7.jpg)
+![](./images/8.jpg)
 
 
 
