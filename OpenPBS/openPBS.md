@@ -100,6 +100,21 @@ chmod -x /opt/pbs/etc/pbs.sh
 # just in case export command do not work, export it mannually
 export PATH=${PATH}:/opt/pbs/bin
 
+# copy the /etc/pbs.conf file from master to node1(run on master)
+scp /etc/pbs.conf root@[ip]:/etc/pbs.conf
+
+# create a nfs server on master and mount this on node2
+yum install -y nfs-utils
+systemctl start nfs-server rpcbind
+systemctl enable nfs-server rpcbind
+echo '/root/rpmbuild/RPMS/x86_64/ 10.10.10.0/24(rw,sync,no_root_squash)' >> /etc/exports
+exportfs -r
+
+# on node2 
+yum install -y nfs-utils
+showmount -e 10.10.10.158
+mount -t nfs 10.10.10.158:/home /home 
+
 
 ```
 ![](./images/7.jpg)
