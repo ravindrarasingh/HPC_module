@@ -127,7 +127,13 @@ mount -t nfs 10.10.10.158:/home /home
 
 
 
+## Day 3
+```bash
+# to view conigurating in files
+qmgr p s
 
+
+```
 
 
 
