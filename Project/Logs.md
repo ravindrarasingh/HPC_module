@@ -9,24 +9,32 @@
 
 
 ### Step 1 : Installation of the warewulf
-`GitHub: `
+
+[Github](https://github.com/hpcng/warewulf/releases/tag/v4.2.0)
 ```bash
-mkdir ~/git
-cd ~/git
-git clone https://github.com/hpcng/warewulf.git
-cd warewulf
-git checkout main # or switch to a tag like '4.2.0'
-make all && sudo make install
+# change the hostname
+
+# disable the selinux
+
+# add services to 
+sudo systemctl restart firewalld
+sudo firewall-cmd --permanent --add-service warewulf
+sudo firewall-cmd --permanent --add-service nfs
+sudo firewall-cmd --permanent --add-service tftp
+sudo firewall-cmd --reload
+
+# download the repository
+wget https://github.com/hpcng/warewulf/releases/tag/v4.2.0;
+# install the local 
+yum localinstall warewulf-4.2.0-2.el7.x86_64.rpm;
+
 ```
-
-### Step 2 : installing the required services
-```bash
-yum install dhcp-server tftp-server nfs-utils -y;
+![](./images/WareWulf_install.jpg)
+![](./images/warewulf_installation.jpg)
 
 
-``` 
 
-### Step 3 : editing the configuration
+### Step 2 : editing the configuration
 [References](https://warewulf.org/docs/development/contents/configuration.html)  
 `Location: /etc/warewulf`
 ```bash
