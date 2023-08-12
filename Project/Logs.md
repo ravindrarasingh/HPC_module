@@ -1,4 +1,7 @@
+[Documentation](https://warewulf.org/docs/development/)
 ## Perform installation of Warewulf,pbs,ganglia,ldap on single machine
+
+
 
 # warewulf:
 * Warewulf is an operating system provisioning platform for Linux
@@ -71,4 +74,32 @@ nfs:
   systemd name: nfs-server
 
 ``` 
+### Step 3 : check if warewulf is running or not if not start the service
+```
+systemctl status warewulfd
+systemctl enable warewulfd
+systemctl start warewulfd
+
+# to check if server is running or not
+wwctl server status
+```
+
+### Step 4 : Warewulf Commands:
+```
+wwctl
+wwstats
+wwlist
+
+wwctl commands:
+node 
+configure
+container
+power
+profile
+server
+kernel
+overlays
+node ssh
+ssh
+```
 
