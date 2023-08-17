@@ -120,41 +120,90 @@ TroubleShooting:
 OpenPBS Installation: 
 References Link: https://raw.githubusercontent.com/openpbs/openpbs/master/INSTALL
 
-Step 1 : configure and enable powertools
--> dnf install -y dnf-plugins-core
--> dnf config-manager --set-enabled powertools
--> dnf install -y gcc make rpm-build libtool hwloc-devel \
-      libX11-devel libXt-devel libedit-devel libical-devel \
-      ncurses-devel perl postgresql-devel postgresql-contrib python3-devel tcl-devel \
-      tk-devel swig expat-devel openssl-devel libXext libXft \
-      autoconf automake gcc-c++
+-> On master
+	Step 1 : configure and enable powertools
+		-> dnf install -y dnf-plugins-core
+		-> dnf config-manager --set-enabled powertools
+		-> dnf install -y gcc make rpm-build libtool hwloc-devel \
+		      libX11-devel libXt-devel libedit-devel libical-devel \
+		      ncurses-devel perl postgresql-devel postgresql-contrib python3-devel tcl-devel \
+		      tk-devel swig expat-devel openssl-devel libXext libXft \
+		      autoconf automake gcc-c++
 
-Step 2 : Install the prerequisite packages for running PBS
--> yum install -y expat libedit postgresql-server postgresql-contrib python3 \
-      sendmail sudo tcl tk libical
-Step 3 : download the package from git repo
--> git clone https://github.com/openpbs/openpbs.git
-# navigate to the directory
--> cd openpbs
-# run autogen.sh file
--> ./autogen.sh
-# create prefix file
--> mkdir /opt/pbs
-# build files using this command
--> ./configure --help
-# set the output path
--> ./configure --prefix=/opt/pbs/
--> make
--> sudo make install
--> sudo /opt/pbs/libexec/pbs_postinstall
--> cat /etc/pbs.conf
-# change file permissions
--> chmod 4755 /opt/pbs/sbin/pbs_iff /opt/pbs/sbin/pbs_rcp
-# start the services
--> /etc/init.d/pbs start
-# sources the openpbs script
--> . /etc/profile.d/pbs.sh
--> qstat -B
+	Step 2 : Install the prerequisite packages for running PBS
+		-> yum install -y expat libedit postgresql-server postgresql-contrib python3 \
+		      sendmail sudo tcl tk libical
+	Step 3 : download the package from git repo
+		-> git clone https://github.com/openpbs/openpbs.git
+		# navigate to the directory
+		-> cd openpbs
+		# run autogen.sh file
+		-> ./autogen.sh
+		# create prefix file
+		-> mkdir /opt/pbs
+		# build files using this command
+		-> ./configure --help
+		# set the output path
+		-> ./configure --prefix=/opt/pbs/
+		-> make
+		-> sudo make install
+		-> sudo /opt/pbs/libexec/pbs_postinstall
+		-> cat /etc/pbs.conf
+		# change file permissions
+		-> chmod 4755 /opt/pbs/sbin/pbs_iff /opt/pbs/sbin/pbs_rcp
+		# start the services
+		-> /etc/init.d/pbs start
+		# sources the openpbs script
+		-> . /etc/profile.d/pbs.sh
+		-> qstat -B
+
+-> For node1
+	-> wwctl container exec rocky-8 /bin/bash
+	Step 1 : configure and enable powertools
+		-> dnf install -y dnf-plugins-core
+		-> dnf config-manager --set-enabled powertools
+		-> dnf install -y gcc make rpm-build libtool hwloc-devel \
+		      libX11-devel libXt-devel libedit-devel libical-devel \
+		      ncurses-devel perl postgresql-devel postgresql-contrib python3-devel tcl-devel \
+		      tk-devel swig expat-devel openssl-devel libXext libXft \
+		      autoconf automake gcc-c++
+
+	Step 2 : Install the prerequisite packages for running PBS
+		-> yum install -y expat libedit postgresql-server postgresql-contrib python3 \
+		      sendmail sudo tcl tk libical
+	Step 3 : download the package from git repo
+		-> git clone https://github.com/openpbs/openpbs.git
+		# navigate to the directory
+		-> cd openpbs
+		# run autogen.sh file
+		-> ./autogen.sh
+		# create prefix file
+		-> mkdir /opt/pbs
+		# build files using this command
+		-> ./configure --help
+		# set the output path
+		-> ./configure --prefix=/opt/pbs/
+		-> make
+		-> sudo make install
+		-> sudo /opt/pbs/libexec/pbs_postinstall
+		-> cat /etc/pbs.conf
+		# change file permissions
+		-> chmod 4755 /opt/pbs/sbin/pbs_iff /opt/pbs/sbin/pbs_rcp
+		# start the services
+		-> /etc/init.d/pbs start
+		# sources the openpbs script
+		-> . /etc/profile.d/pbs.sh
+		-> qstat -B
+-> on master 
+	-> vim /var/spool/pbs/server_priv/nodes
+		-> node1 np=1
+		-> warewulf np=1
+	-> qmgr
+		-> create node node1 (# hostname of node1)
+		-> create node warewulf (# hostname of master)
+		-> exit
+	-> pbsnodes -a
+
 
 			
 LDAP installation ( Rocky Linux:8.6 )
