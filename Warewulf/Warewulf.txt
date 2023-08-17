@@ -68,7 +68,8 @@ Question : How to install warewulf
 				-> New password : root
 				-> Confirm New password : root
 			-> exit
-			
+		# to set profile
+		->  wwctl profile set -y default --netname default --netmask 255.255.255.0 --gateway 10.10.10.1
 		
 		
 	Step 9 : Boot the compute node
@@ -106,7 +107,38 @@ TroubleShooting:
 				Zypper is a software management command-line program. It may add package repositories, search for packages, install, 
 				uninstall, or update packages, install patches, and device drivers, and check dependencies, among other things.
 			-> Step 1: install zypper
-				
+
+OpenPBS Installation: 
+References Link: https://raw.githubusercontent.com/openpbs/openpbs/master/INSTALL
+
+Step 1 : configure and enable powertools
+-> dnf install -y dnf-plugins-core
+-> dnf config-manager --set-enabled powertools
+-> dnf install -y gcc make rpm-build libtool hwloc-devel \
+      libX11-devel libXt-devel libedit-devel libical-devel \
+      ncurses-devel perl postgresql-devel postgresql-contrib python3-devel tcl-devel \
+      tk-devel swig expat-devel openssl-devel libXext libXft \
+      autoconf automake gcc-c++
+
+Step 2 : Install the prerequisite packages for running PBS
+-> yum install -y expat libedit postgresql-server postgresql-contrib python3 \
+      sendmail sudo tcl tk libical
+Step 3 : download the package from git repo
+-> git clone https://github.com/openpbs/openpbs.git
+-> cd openpbs
+-> ./autogen.sh
+-> mkdir /opt/pbs
+-> ./configure --help
+-> ./configure --prefix=/opt/pbs/
+-> make
+-> sudo make install
+-> sudo /opt/pbs/libexec/pbs_postinstall
+-> cat /etc/pbs.conf
+-> chmod 4755 /opt/pbs/sbin/pbs_iff /opt/pbs/sbin/pbs_rcp
+-> /etc/init.d/pbs start
+-> . /etc/profile.d/pbs.sh
+-> qstat -B
+
 			
 LDAP installation ( Rocky Linux:8.6 )
 References Link : https://www.server-world.info/en/note?os=Rocky_Linux_8&p=openldap&f=1
