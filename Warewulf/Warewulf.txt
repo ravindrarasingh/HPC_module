@@ -231,7 +231,7 @@ Ganglia Installation:
 		# create user mannually
 		-> groupadd -g 972 Ganglia;
 		-> useradd -m -c "Ganglia Monitoring System" -d /var/lib/ganglia -u 974 -g Ganglia -s /sbin/nologin ganglia;
-		# start the services
+		# start the
 		-> systemctl start gmond
 		-> systemctl enable gmond
 		-> systemctl status gmond
@@ -278,37 +278,79 @@ olcRootPW: {SSHA}483j6aIVS2AzsKN6XM7C9iLNpzz+A6Q5
 
 -> Step 8 : set your domain name on LDAP Database
 	-> vi chdomain.ldif
-# replace to your own domain name for [dc=***,dc=***] section
-# specify the password generated above for [olcRootPW] section
 dn: olcDatabase={1}monitor,cn=config
 changetype: modify
 replace: olcAccess
-olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth"
-  read by dn.base="cn=Manager,dc=srv,dc=world" read by * none
+olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" read by dn.base="cn=Manager,dc=cdac,dc=in" read by * none
 
 dn: olcDatabase={2}hdb,cn=config
 changetype: modify
 replace: olcSuffix
-olcSuffix: dc=srv,dc=world
+olcSuffix: dc=cdac,dc=in
 
 dn: olcDatabase={2}hdb,cn=config
 changetype: modify
-replace: olcRootDN
-olcRootDN: cn=Manager,dc=srv,dc=world
+replace: olcRootDn
+olcRootDN: cn=Manager,dc=cdac,dc=in
 
 dn: olcDatabase={2}hdb,cn=config
 changetype: modify
 add: olcRootPW
-olcRootPW: {SSHA}483j6aIVS2AzsKN6XM7C9iLNpzz+A6Q5
+olcRootPW: {SSHA}483j6aIVS2AzsKN6XM7C9iLNpzz+A6Q5 
 
 dn: olcDatabase={2}hdb,cn=config
 changetype: modify
 add: olcAccess
-olcAccess: {0}to attrs=userPassword,shadowLastChange by
-  dn="cn=Manager,dc=srv,dc=world" write by anonymous auth by self write by * none
+olcAccess: {0}to attrs=userPassword,shadowLastChange by dn="cn=Manager,dc=cdac,dc=in" write by anonymous auth by self write by * none
 olcAccess: {1}to dn.base="" by * read
-olcAccess: {2}to * by dn="cn=Manager,dc=srv,dc=world" write by * read
+olcAccess: {2}to * by dn="cn=Manager,dc=cdac,dc=in" write by * read
 
 -> Step 9 : add the chdomain.ldif
 	-> ldapmodify -Y EXTERNAL -H ldapi:/// -f chdomain.ldif
+
+-> Step 10 : create basedomain.ldif
+dn: dc=cdac,dc=in
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: cdac in
+dc: cdac
+
+dn: cn=Manager,dc=cdac,dc=in
+objectClass: organizationalRole
+cn: Manager
+description: Directory Manager
+
+dn: ou=People,dc=cdac,dc=in
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Group,dc=cdac,dc=in
+objectClass: organizationalUnit
+ou: Group
+
+-> Step 11 : add the basedomain.ldif file to database
+	-> ldapadd -x -D cn=Manager,dn=cdac,dc=in -W -f basedomain.ldif
+
+-> Step 12 : create file ldapuser.ldif
+dn: uid=user1,ou=People,dc=cdac,dc=in
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: user1
+sn: test
+userpassword: {SSHA}qiPF036kY5IaZ1bCBD3SrvRsoFSIrkwk
+loginShell: /bin/bash
+uidNumber: 1001
+gidNumber: 1001
+homeDirectory: /home/user1
+
+dn: cn=user1,ou=Group,dc=cdac,dc=in
+objectClass: posixGroup
+cn: user1
+gidNumber: 1001
+
+-> Step 13 : add file to ldap database
+	-> ldapadd -x -D cn=Manager,dn=cdac,dc=in -W -f ldapuser.ldif
+
 	
