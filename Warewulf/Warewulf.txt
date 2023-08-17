@@ -1,3 +1,9 @@
+prerequisites:
+	OS : Rocky_Linux_8.6
+	RAM : 4 GB
+	HDD : 20 GB
+	core : 2
+
 Warewulf v4:
 
 References for warewulf:
@@ -125,17 +131,25 @@ Step 2 : Install the prerequisite packages for running PBS
       sendmail sudo tcl tk libical
 Step 3 : download the package from git repo
 -> git clone https://github.com/openpbs/openpbs.git
+# navigate to the directory
 -> cd openpbs
+# run autogen.sh file
 -> ./autogen.sh
+# create prefix file
 -> mkdir /opt/pbs
+# build files using this command
 -> ./configure --help
+# set the output path
 -> ./configure --prefix=/opt/pbs/
 -> make
 -> sudo make install
 -> sudo /opt/pbs/libexec/pbs_postinstall
 -> cat /etc/pbs.conf
+# change file permissions
 -> chmod 4755 /opt/pbs/sbin/pbs_iff /opt/pbs/sbin/pbs_rcp
+# start the services
 -> /etc/init.d/pbs start
+# sources the openpbs script
 -> . /etc/profile.d/pbs.sh
 -> qstat -B
 
