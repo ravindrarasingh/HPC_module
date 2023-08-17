@@ -3,6 +3,9 @@ prerequisites:
 	RAM : 4 GB
 	HDD : 20 GB
 	core : 2
+	# after installing the OS
+		-> Disable Selinux
+		-> Disable Firewalld
 
 Warewulf v4:
 
