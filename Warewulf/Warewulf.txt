@@ -204,6 +204,39 @@ References Link: https://raw.githubusercontent.com/openpbs/openpbs/master/INSTAL
 		-> exit
 	-> pbsnodes -a
 
+Ganglia Installation:
+	-> Master:
+		# install the package
+		-> dnf install epel-release
+		-> dnf install ganglia ganglia-gmetad ganglia-gmond ganglia-web
+		# edit the gmetad.conf File
+		-> vi /etc/ganglia/gmetad.conf
+			-> on line no 44 : change cluster name 
+			-> Cluster Name: ganglia_cluster
+		-> vi /etc/ganglia/gmond.conf
+			-> Line number 30 : give cluster name given in gmetad.conf
+			-> Line number 50 : change default ip to master's ip
+			-> Line number 57,59 : comment these lines
+		-> systemctl start gmetad gmond httpd
+		-> systemctl enable gmetad gmond httpd
+		-> systemctl status gmetad gmond httpd
+	-> Node1:
+		-> dnf install epel-release
+		-> dnf install ganglia-gmond
+		# edit the gmetad.conf File
+		-> vi /etc/ganglia/gmond.conf
+			-> Line number 30 : give cluster name given in gmetad.conf
+			-> Line number 50 : change default ip to master's ip
+			-> Line number 57,59 : comment these lines
+		# create user mannually
+		-> groupadd -g 972 Ganglia;
+		-> useradd -m -c "Ganglia Monitoring System" -d /var/lib/ganglia -u 974 -g Ganglia -s /sbin/nologin ganglia;
+		# start the services
+		-> systemctl start gmond
+		-> systemctl enable gmond
+		-> systemctl status gmond
+
+
 
 			
 LDAP installation ( Rocky Linux:8.6 )
