@@ -1,0 +1,183 @@
+Warewulf v4:
+
+References for warewulf:
+-> https://warewulf.org/docs/development/contents/introduction.html
+-> https://www.admin-magazine.com/HPC/Articles/Warewulf-4
+-> https://www.admin-magazine.com/HPC/Articles/Warewulf-4-Time-and-Resource-Management
+-> https://www.admin-magazine.com/HPC/Articles/Warewulf-4-Environment-Modules
+-> https://www.admin-magazine.com/HPC/Articles/Warewulf-4-GPUs
+
+Question : How to install warewulf
+-> to install warewulf
+	Step 1 : disable Selinux
+	Step 2 : disable the firewall
+	Step 3 : install the repository
+		-> yum install -y https://repo.ctrliq.com/rhel/8/ciq-release.rpm
+		-> yum install -y warewulf
+		
+	Step 4 : edit the config file 
+		-> vi /etc/warewulf/warewulf.conf
+			-> change ipaddr, network, dhcp range
+			
+	Step 5 : Initialize the warewulf
+		-> wwctl configure --all
+		
+	Step 6 : check if services are running or not
+		-> systemctl status dhcpd tftp nfs-server warewulfd
+		# if services are not running then restart the services
+			-> systemctl start dhcpd tftp nfs-server warewulfd
+		# enable the services
+			-> systemctl enable dhcpd tftp nfs-server warewulfd
+		# check logs if necessary
+			-> cat /var/log/warewulfd.log
+			
+	Step 7 : Pull container 
+		-> wwctl container import docker://warewulf/rocky rocky-8
+		-> wwctl container import docker://warewulf/centos-7 centos-7
+		-> wwctl container import docker://ghcr.io/hpcng/warewulf-centos:7 centos-7 
+		# to sync uid and gid
+		-> wwctl container syncuser --write centos-7
+		# import kernel
+		-> wwctl container import docker://registry.opensuse.org/science/warewulf/tumbleweed/containerfile/kernel:latest tw
+		# import kernel from container tw
+		-> wwctl kernel import -DC tw
+		# check if container is downloaded or not
+		-> wwctl container list
+		# to modify the container 
+		-> wwctl container exec rocky-8 /bin/bash
+		
+		
+	
+	Step 8 : Configure the Compute Node
+		# to get list of the the compute nodes
+		-> wwctl node list -a
+		# To add a compute node
+		-> wwctl node add --netdev [Interface name] --hwaddr [MAC addr] --ipaddr [IP addr] --netmask 255.255.255.0 [Node-name]
+		-> wwctl node add --netdev ens34 --hwaddr 00:0c:29:bf:82:4e --ipaddr 10.10.10.42 --netmask 255.255.255.0 cn1
+		-> wwctl node add --netdev ens34 --hwaddr 00:0c:29:1a:72:66 --ipaddr 10.10.10.205 --netmask 255.255.255.0 node1
+		# if MAC address is not known then we can use the command
+		-> sudo wwctl node add node1 --ipaddr [IP addr] --discoverable
+		# to set the compute node with specific container image
+		-> wwctl node set --container [container-name] [node-name]
+		-> wwctl node set --container centos-7 node1
+		-> wwctl node set -K tw node1
+		# change password for compute node
+		-> wwctl container exec centos-7 /bin/bash
+			-> yum install passwd -y
+			-> passwd root
+				-> New password : root
+				-> Confirm New password : root
+			-> exit
+			
+		
+		
+	Step 9 : Boot the compute node
+		# check that the NFS exported files have mounted (use the mount command),
+		# look at the local IP address (ip addr show),
+		# ping the host node with the IP address (ping 10.0.0.1), and
+		# check the hostname of the node (more /etc/hostname)
+		# start the compute node on the given network 
+	
+	Step 10 : try ping the compute node
+
+Question : what are the components of the warewulf
+	Components of warewulf:
+		-> nodes.conf : this file contains information about the nodes
+		-> default.conf : this file contains the default profile information
+		-> warewulf.conf : to change warewulf configuration
+		# overlays
+		# profile
+		
+Question : How to add boot image in warewulf
+	# to add custom nodes
+		-> wwctl node set --container [container-name] [node-name]
+	
+Question : How to download and add Container
+	# to download container from docker hub
+		-> wwctl container import docker://{url}
+		
+TroubleShooting:
+
+-> Problem 1: Compute Node wont boot, if kernerl version used in container is not matching with the kernel 
+			  of the host operating systemctl
+	Tried Solution 1:
+		-> installing the same kernel which has been installed in the container using zypper
+			# what is zypper
+				Zypper is a software management command-line program. It may add package repositories, search for packages, install, 
+				uninstall, or update packages, install patches, and device drivers, and check dependencies, among other things.
+			-> Step 1: install zypper
+				
+			
+LDAP installation ( Rocky Linux:8.6 )
+References Link : https://www.server-world.info/en/note?os=Rocky_Linux_8&p=openldap&f=1
+References Link : https://www.server-world.info/en/note?os=Rocky_Linux_8&p=openldap&f=1
+-> Step 1 : installing the Ldap server
+	-> dnf update
+	-> dnf config-manager --set-enabled plus
+	-> dnf clean all
+	-> dnf --enablerepo=powertools -y install openldap-servers openldap-clients
+	
+-> Step 2 : start and enable the services
+	-> systemctl start slapd
+	-> systemctl enable slapd
+	-> systemctl status slapd
+	
+-> Step 3 : copy the Database_example
+	-> cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+	
+-> Step 4 : Change the ownership of the file 
+	-> chown ldap. /var/lib/ldap/DB_CONFIG
+	
+-> Step 5 : change the root password 
+	-> slappasswd
+	# Hash generated : {SSHA}483j6aIVS2AzsKN6XM7C9iLNpzz+A6Q5
+	
+-> Step 6 : Add the hash generated password into chrootpw.ldif
+# specify the password generated above for [olcRootPW] section
+dn: olcDatabase={0}config,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: {SSHA}483j6aIVS2AzsKN6XM7C9iLNpzz+A6Q5
+
+-> Step 7 : run the given command to add files to database
+	-> ldapadd -Y EXTERNAL -H ldapi:/// -f chrootpw.ldif
+	-> ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+	-> ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
+	-> ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+
+-> Step 8 : set your domain name on LDAP Database
+	-> vi chdomain.ldif
+# replace to your own domain name for [dc=***,dc=***] section
+# specify the password generated above for [olcRootPW] section
+dn: olcDatabase={1}monitor,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth"
+  read by dn.base="cn=Manager,dc=srv,dc=world" read by * none
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=srv,dc=world
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootDN
+olcRootDN: cn=Manager,dc=srv,dc=world
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: {SSHA}483j6aIVS2AzsKN6XM7C9iLNpzz+A6Q5
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcAccess
+olcAccess: {0}to attrs=userPassword,shadowLastChange by
+  dn="cn=Manager,dc=srv,dc=world" write by anonymous auth by self write by * none
+olcAccess: {1}to dn.base="" by * read
+olcAccess: {2}to * by dn="cn=Manager,dc=srv,dc=world" write by * read
+
+-> Step 9 : add the chdomain.ldif
+	-> ldapmodify -Y EXTERNAL -H ldapi:/// -f chdomain.ldif
+	

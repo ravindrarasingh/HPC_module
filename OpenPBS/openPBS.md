@@ -7,7 +7,7 @@
 git clone https://github.com/openpbs/openpbs.git
 
 # install deveopment tools
-yum groupinstall "Development Tools"
+yum groupinstall "Development Tools" -y
 
 ```
 ![](./images/1.jpg)
@@ -33,8 +33,11 @@ cat dependencies_list | sed -n '4,20p' | awk '{print $1}'
 # install the dependencies
 yum install -y libtool-ltdl-devel hwloc-devel libX11-devel libXt-devel libedit-devel libical-devel ncurses-devel postgresql-devel postgresql-contrib python3-devel tcl-devel tk-devel zlib-devel expat-devel openssl-devel libXext libXft gcc hwloc-devel;
 
+# re-run the command after installing dependencies
+rpmbuild -ba openpbs.spec
+
 # navigate to the directory 
-cd /root/rpmbuild/RPMS/x86_64 
+cd /root/rpmbuild/RPMS/x86_64
 
 # install opebpbs-server
 yum install openbps-server-23.06
@@ -49,6 +52,8 @@ chmod 4755 /opt/pbs/sbin/pbs_iff /opt/pbs/sbin/pbs_rcp
 
 # to start the services
 systemctl start pbs
+systemctl status pbs
+systemctl enable pbs
 
 # to check the status of the service
 /etc/init.d/pbs status
