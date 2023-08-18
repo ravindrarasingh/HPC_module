@@ -242,115 +242,147 @@ Ganglia Installation:
 LDAP installation ( Rocky Linux:8.6 )
 References Link : https://www.server-world.info/en/note?os=Rocky_Linux_8&p=openldap&f=1
 References Link : https://www.server-world.info/en/note?os=Rocky_Linux_8&p=openldap&f=1
--> Step 1 : installing the Ldap server
-	-> dnf update
-	-> dnf config-manager --set-enabled plus
-	-> dnf clean all
-	-> dnf --enablerepo=powertools -y install openldap-servers openldap-clients
-	
--> Step 2 : start and enable the services
+References Link : https://www.itzgeek.com/how-tos/linux/centos-how-tos/step-step-openldap-server-configuration-centos-7-rhel-7.html
+
+prerequisite:
+	-> echo "[LDAP_server ip] LDAP Server" >> /etc/hosts
+	-> echo "[LDAP_client ip] LDAP Client" >> /etc/hosts
+
+# Step 1 : installing the Ldap server
+	-> yum -y install openldap compat-openldap openldap-clients openldap-servers openldap-servers-sql openldap-devel
+
+# Step 2 : start the services	
 	-> systemctl start slapd
 	-> systemctl enable slapd
-	-> systemctl status slapd
-	
--> Step 3 : copy the Database_example
-	-> cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
-	
--> Step 4 : Change the ownership of the file 
-	-> chown ldap. /var/lib/ldap/DB_CONFIG
-	
--> Step 5 : change the root password 
-	-> slappasswd
-	# Hash generated : {SSHA}483j6aIVS2AzsKN6XM7C9iLNpzz+A6Q5
-	
--> Step 6 : Add the hash generated password into chrootpw.ldif
-# specify the password generated above for [olcRootPW] section
-dn: olcDatabase={0}config,cn=config
-changetype: modify
-add: olcRootPW
-olcRootPW: {SSHA}483j6aIVS2AzsKN6XM7C9iLNpzz+A6Q5
 
--> Step 7 : run the given command to add files to database
-	-> ldapadd -Y EXTERNAL -H ldapi:/// -f chrootpw.ldif
+# Step 3 : verify if LDAP server is running or not
+	-> netstat -antup | grep -i 389
+
+# Step 4 : create LDAP admin password
+	-> slappasswd 
+		-> Enter password: root
+		-> Enter password again: root
+		# save password which has been generated [{SSHA}jMbSMRq0jsIRu2Fd1n53CXiJXyzwMApP]
+	
+# Step 5 : Configure the LDAP server
+	# theory
+		# olcSuffix : Database Suffix, it is the domain for which the ldap server 
+		provides the information. In simple words, it should be changed to your domain
+
+		# olcRootDN : Root distuinguished Name entry for the user who has the unrestricted
+		access to perform all administration on LDAP, like a root user
+
+		# olcRootPW : LDAP Admin password for RootDN
+
+	-> vi db.ldif
+		dn: olcDatabase={2}hdb,cn=config
+		changetype: modify
+		replace: olcSuffix
+		olcSuffix: dc=cdac,dc=in
+
+		dn: olcDatabase={2}hdb,cn=config
+		changetype: modify
+		replace: olcRootDN
+		olcRootDN: cn=admin,dc=cdac,dc=in
+
+		dn: olcDatabase={2}hdb,cn=config
+		changetype: modify
+		replace: olcRootPW
+		olcRootPW: [password generated in slappasswd]
+
+# Step 6 : modify the ldap server database
+	-> ldapmodify -Y EXTERNAL -H ldapi:/// -f db.ldif
+
+# Step 7 : make changes to monitor.ldif
+	-> vi monitor.ldif
+		dn: olcDatabase={1}monitor,cn=config
+		changetype: modify
+		replace: olcAccess
+		olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="cn=admin,dc=cdac,dc=in" read by * none
+
+# Step 8 : modify the monitor.ldif
+	-> ldapmodify -Y EXTERNAL -H ldapi:/// -f monitor.ldif
+
+# Step 9 : Set up LDAP Database
+	-> cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+	-> chown ldap:ldap /var/lib/ldap/*
+
+# Step 10 : add the LDAP schemas
 	-> ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
 	-> ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
 	-> ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
 
--> Step 8 : set your domain name on LDAP Database
-	-> vi chdomain.ldif
-dn: olcDatabase={1}monitor,cn=config
-changetype: modify
-replace: olcAccess
-olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" read by dn.base="cn=Manager,dc=cdac,dc=in" read by * none
+# Step 11 : generate base.ldif 
+	-> dn: dc=cdac,dc=in
+	-> dc: cdac
+	-> objectClass: top
+	-> objectClass: domain
+	-> 
+	-> dn: cn=admin ,dc=cdac,dc=in
+	-> objectClass: organizationalRole
+	-> cn: admin
+	-> description: LDAP Manager
+	-> 
+	-> dn: ou=People,dc=cdac,dc=in
+	-> objectClass: organizationalUnit
+	-> ou: People
+	-> 
+	-> dn: ou=Group,dc=cdac,dc=in
+	-> objectClass: organizationalUnit
+	-> ou: Group
 
-dn: olcDatabase={2}hdb,cn=config
-changetype: modify
-replace: olcSuffix
+# Step 12 : add the base.ldif
+	-> ldapadd -x -W -D "cn=admin,dc=cdac,dc=in" -f base.ldif
+
+# Step 13 : create usr1.ldif
+	-> dn: uid=usr1,ou=people,dc=cdac,dc=in
+	-> objectClass: top
+	-> objectClass: account
+	-> objectClass: posixAccount
+	-> objectClass: shadowAccount
+	-> cn: usr1
+	-> uid: usr1
+	-> uidNumber: 9999
+	-> gidNumber: 100
+	-> homeDirectory: /home/usr1
+	-> loginShell: /bin/bash
+	-> gecos: Raj [Admin (at) ITzGeek]
+	-> userPassword: {crypt}x
+	-> shadowLastChange: 17058
+	-> shadowMin: 0
+	-> shadowMax: 99999
+	-> shadowWarning: 7
+
+# Step 14 : add usr1 to file
+	-> ldapadd -x -W -D "cn=people,dc=cdac,dc=in" -f usr1.ldif
+
+# Step 15 : assign password to the user
+	-> ldappasswd -s root -W -D "cn=people,dc=cdac,dc=in" -x "uid=usr1,ou=people,dc=cdac,dc=in"
+
+# Step 16 : to verify user has been created 
+	-> ldapsearch -x cn=raj -b dc=cdac,dc=in
+
+# LDAP client configurations:
+Step 1 : install LDAP 
+	-> yum install -y openldap-clients nss-pam-ldapd
+
+Step 2 : connect to server
+	-> authconfig --enableldap --enableldapauth --ldapserver=[server ip] --ldapbasedn="dc=cdac,dc=in" --enablemkhomedir --update
+
+Step 3 : start the service
+	-> systemctl restart  nslcd
+
+Step 4 : to get information about user
+	-> getent passwd usr1
+
+dn: olcDatabase=mdb,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcMdbConfig
+olcDatabase: mdb
+OlcDbMaxSize: 1073741824
 olcSuffix: dc=cdac,dc=in
-
-dn: olcDatabase={2}hdb,cn=config
-changetype: modify
-replace: olcRootDn
 olcRootDN: cn=Manager,dc=cdac,dc=in
+olcRootPW: secret
+olcDbDirectory: /usr/local/var/openldap-data
+olcDbIndex: objectClass eq
 
-dn: olcDatabase={2}hdb,cn=config
-changetype: modify
-add: olcRootPW
-olcRootPW: {SSHA}483j6aIVS2AzsKN6XM7C9iLNpzz+A6Q5 
-
-dn: olcDatabase={2}hdb,cn=config
-changetype: modify
-add: olcAccess
-olcAccess: {0}to attrs=userPassword,shadowLastChange by dn="cn=Manager,dc=cdac,dc=in" write by anonymous auth by self write by * none
-olcAccess: {1}to dn.base="" by * read
-olcAccess: {2}to * by dn="cn=Manager,dc=cdac,dc=in" write by * read
-
--> Step 9 : add the chdomain.ldif
-	-> ldapmodify -Y EXTERNAL -H ldapi:/// -f chdomain.ldif
-
--> Step 10 : create basedomain.ldif
-dn: dc=cdac,dc=in
-objectClass: top
-objectClass: dcObject
-objectClass: organization
-o: cdac in
-dc: cdac
-
-dn: cn=Manager,dc=cdac,dc=in
-objectClass: organizationalRole
-cn: Manager
-description: Directory Manager
-
-dn: ou=People,dc=cdac,dc=in
-objectClass: organizationalUnit
-ou: People
-
-dn: ou=Group,dc=cdac,dc=in
-objectClass: organizationalUnit
-ou: Group
-
--> Step 11 : add the basedomain.ldif file to database
-	-> ldapadd -x -D cn=Manager,dn=cdac,dc=in -W -f basedomain.ldif
-
--> Step 12 : create file ldapuser.ldif
-dn: uid=user1,ou=People,dc=cdac,dc=in
-objectClass: inetOrgPerson
-objectClass: posixAccount
-objectClass: shadowAccount
-cn: user1
-sn: test
-userpassword: {SSHA}qiPF036kY5IaZ1bCBD3SrvRsoFSIrkwk
-loginShell: /bin/bash
-uidNumber: 1001
-gidNumber: 1001
-homeDirectory: /home/user1
-
-dn: cn=user1,ou=Group,dc=cdac,dc=in
-objectClass: posixGroup
-cn: user1
-gidNumber: 1001
-
--> Step 13 : add file to ldap database
-	-> ldapadd -x -D cn=Manager,dn=cdac,dc=in -W -f ldapuser.ldif
-
-	
