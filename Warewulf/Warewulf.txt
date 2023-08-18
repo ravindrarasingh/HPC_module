@@ -64,11 +64,12 @@ Question : How to install warewulf
 		-> wwctl node add --netdev [Interface name] --hwaddr [MAC addr] --ipaddr [IP addr] --netmask 255.255.255.0 [Node-name]
 		-> wwctl node add --netdev ens34 --hwaddr 00:0c:29:bf:82:4e --ipaddr 10.10.10.42 --netmask 255.255.255.0 cn1
 		-> wwctl node add --netdev ens34 --hwaddr 00:0c:29:1a:72:66 --ipaddr 10.10.10.205 --netmask 255.255.255.0 node1
+		-> wwctl node add --netdev ens34 --hwaddr 00:0c:29:24:99:c3 --ipaddr 10.10.10.225 --netmask 255.255.255.0 node1
 		# if MAC address is not known then we can use the command
 		-> sudo wwctl node add node1 --ipaddr [IP addr] --discoverable
 		# to set the compute node with specific container image
 		-> wwctl node set --container [container-name] [node-name]
-		-> wwctl node set --container centos-7 node1
+		-> wwctl node set --container rocky-8 node1
 		-> wwctl node set -K tw node1
 		# change password for compute node
 		-> wwctl container exec centos-7 /bin/bash
@@ -90,32 +91,6 @@ Question : How to install warewulf
 	
 	Step 10 : try ping the compute node
 
-Question : what are the components of the warewulf
-	Components of warewulf:
-		-> nodes.conf : this file contains information about the nodes
-		-> default.conf : this file contains the default profile information
-		-> warewulf.conf : to change warewulf configuration
-		# overlays
-		# profile
-		
-Question : How to add boot image in warewulf
-	# to add custom nodes
-		-> wwctl node set --container [container-name] [node-name]
-	
-Question : How to download and add Container
-	# to download container from docker hub
-		-> wwctl container import docker://{url}
-		
-TroubleShooting:
-
--> Problem 1: Compute Node wont boot, if kernerl version used in container is not matching with the kernel 
-			  of the host operating systemctl
-	Tried Solution 1:
-		-> installing the same kernel which has been installed in the container using zypper
-			# what is zypper
-				Zypper is a software management command-line program. It may add package repositories, search for packages, install, 
-				uninstall, or update packages, install patches, and device drivers, and check dependencies, among other things.
-			-> Step 1: install zypper
 
 OpenPBS Installation: 
 References Link: https://raw.githubusercontent.com/openpbs/openpbs/master/INSTALL
@@ -162,15 +137,15 @@ References Link: https://raw.githubusercontent.com/openpbs/openpbs/master/INSTAL
 	Step 1 : configure and enable powertools
 		-> dnf install -y dnf-plugins-core
 		-> dnf config-manager --set-enabled powertools
-		-> dnf install -y gcc make rpm-build libtool hwloc-devel \
-		      libX11-devel libXt-devel libedit-devel libical-devel \
-		      ncurses-devel perl postgresql-devel postgresql-contrib python3-devel tcl-devel \
-		      tk-devel swig expat-devel openssl-devel libXext libXft \
-		      autoconf automake gcc-c++
+		-> 
+dnf install -y gcc make rpm-build libtool hwloc-devel \
+libX11-devel libXt-devel libedit-devel libical-devel \
+ncurses-devel perl postgresql-devel postgresql-contrib python3-devel tcl-devel \
+tk-devel swig expat-devel openssl-devel libXext libXft \
+autoconf automake gcc-c++
 
 	Step 2 : Install the prerequisite packages for running PBS
-		-> yum install -y expat libedit postgresql-server postgresql-contrib python3 \
-		      sendmail sudo tcl tk libical
+		-> yum install -y expat libedit postgresql-server postgresql-contrib python3 sendmail sudo tcl tk libical
 	Step 3 : download the package from git repo
 		-> git clone https://github.com/openpbs/openpbs.git
 		# navigate to the directory
